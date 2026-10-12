@@ -1,0 +1,134 @@
+rules_version = '2';
+
+// FocusLine – ortak alanlar.
+// Erişim e-posta + şifre ile giriş yapmış ve e-postasını doğrulamış kullanıcılara açıktır.
+// Bir alana sadece alan sahibi ya da davet edilenler katılabilir.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Yardımcılar ----------
+
+    function signedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function myEmail() {
+      return request.auth.token.email;
+    }
+
+    function roomDoc(roomId) {
+      return /databases/$(database)/documents/rooms/$(roomId);
+    }
+
+    function isMember(roomId) {
+      return signedIn() && exists(/databases/$(database)/documents/rooms/$(roomId)/members/$(request.auth.uid));
+    }
+
+    function isOwner(roomId) {
+      return signedIn() && get(roomDoc(roomId)).data.ownerUid == request.auth.uid;
+    }
+
+    function isInvited(roomId) {
+      return signedIn() && exists(/databases/$(database)/documents/invites/$(roomId + '_' + myEmail()));
+    }
+
+    function shortString(v, max) {
+      return v is string && v.size() > 0 && v.size() <= max;
+    }
+
+    function validMember() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['uid', 'name', 'email', 'lastSeen', 'focusDate', 'focusWeekStart',
+                               'focusToday', 'focusWeek', 'focusRunning', 'focusShared'])
+        && d.uid == request.auth.uid
+        && d.email == myEmail()
+        && shortString(d.name, 40)
+        && d.lastSeen == request.time
+        && (!('focusToday' in d) || (d.focusToday is number && d.focusToday >= 0 && d.focusToday <= 86400))
+        && (!('focusWeek' in d) || (d.focusWeek is number && d.focusWeek >= 0 && d.focusWeek <= 604800));
+    }
+
+    function validIdea(d) {
+      return d.keys().hasOnly(['title', 'desc', 'author', 'authorUid', 'editedBy', 'createdAt', 'updatedAt'])
+        && shortString(d.title, 120)
+        && d.desc is string && d.desc.size() <= 2000
+        && shortString(d.author, 40)
+        && d.authorUid is string;
+    }
+
+    // ---------- Kullanıcının alan listesi ----------
+
+    match /users/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['rooms'])
+        && request.resource.data.rooms is list
+        && request.resource.data.rooms.size() <= 50;
+    }
+
+    // ---------- Alanlar ----------
+
+    match /rooms/{roomId} {
+      allow get: if isMember(roomId) || isInvited(roomId);
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['name', 'ownerUid', 'createdAt'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && shortString(request.resource.data.name, 60);
+      allow update: if isOwner(roomId)
+        && request.resource.data.keys().hasOnly(['name', 'ownerUid', 'createdAt'])
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && shortString(request.resource.data.name, 60);
+    }
+
+    // Üyeler: herkes sadece kendi kaydını yazar. Yeni kayıt için alan sahibi olmak ya da davetli olmak gerekir.
+    // "Son görülme" her zaman sunucu saatidir; odak süreleri makul aralıkta olmalıdır.
+    match /rooms/{roomId}/members/{uid} {
+      allow get, list: if isMember(roomId);
+      allow create: if signedIn() && request.auth.uid == uid && validMember()
+        && (getAfter(roomDoc(roomId)).data.ownerUid == request.auth.uid || isInvited(roomId));
+      allow update: if signedIn() && request.auth.uid == uid && validMember();
+      allow delete: if signedIn() && (request.auth.uid == uid || isOwner(roomId));
+    }
+
+    // Fikirler: herkes ekleyebilir; sadece yazan düzenleyebilir; yazan ya da alan sahibi silebilir.
+    match /rooms/{roomId}/ideas/{ideaId} {
+      allow get, list: if isMember(roomId);
+      allow create: if isMember(roomId) && validIdea(request.resource.data)
+        && (request.resource.data.authorUid == request.auth.uid || isOwner(roomId));
+      allow update: if isMember(roomId) && validIdea(request.resource.data)
+        && resource.data.authorUid == request.auth.uid
+        && request.resource.data.authorUid == resource.data.authorUid;
+      allow delete: if isMember(roomId)
+        && (resource.data.authorUid == request.auth.uid || isOwner(roomId));
+    }
+
+    // Notlar: her üye herhangi bir fikre not ekleyebilir; notu yazan ya da alan sahibi silebilir.
+    match /rooms/{roomId}/notes/{noteId} {
+      allow get, list: if isMember(roomId);
+      allow create: if isMember(roomId)
+        && request.resource.data.keys().hasOnly(['ideaId', 'text', 'author', 'authorUid', 'createdAt'])
+        && shortString(request.resource.data.ideaId, 100)
+        && shortString(request.resource.data.text, 1000)
+        && shortString(request.resource.data.author, 40)
+        && (request.resource.data.authorUid == request.auth.uid || isOwner(roomId));
+      allow delete: if isMember(roomId)
+        && (resource.data.authorUid == request.auth.uid || isOwner(roomId));
+    }
+
+    // Davetler: kimliği "<alan>_<e-posta>". Üyeler davet eder; davetli kendi davetlerini görür ve kabul/ret eder.
+    match /invites/{inviteId} {
+      allow get: if signedIn() && (resource.data.email == myEmail() || isMember(resource.data.roomId));
+      allow list: if signedIn() && resource.data.email == myEmail();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['email', 'roomId', 'roomName', 'invitedBy', 'invitedByUid', 'createdAt'])
+        && inviteId == request.resource.data.roomId + '_' + request.resource.data.email
+        && isMember(request.resource.data.roomId)
+        && request.resource.data.invitedByUid == request.auth.uid
+        && request.resource.data.email == request.resource.data.email.lower()
+        && request.resource.data.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
+        && shortString(request.resource.data.roomName, 60)
+        && shortString(request.resource.data.invitedBy, 40);
+      allow delete: if signedIn() && (resource.data.email == myEmail() || isMember(resource.data.roomId));
+    }
+  }
+}

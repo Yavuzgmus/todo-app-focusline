@@ -1,0 +1,18 @@
+# Bağımlılıklar (npm install ile yeniden kurulur)
+node_modules/
+
+# Derleme çıktıları (npm run dist / npm run build:shared ile yeniden üretilir)
+dist/
+src/renderer/shared.bundle.js
+
+# Firebase yerel test ortamı kayıtları
+*-debug.log
+firebase-debug.log
+
+# Editör / işletim sistemi dosyaları
+.vscode/
+.idea/
+.claude/
+Thumbs.db
+Desktop.ini
+.DS_Store

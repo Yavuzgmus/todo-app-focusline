@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; font-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; connect-src 'self' https://*.googleapis.com" />
+  <title>FocusLine</title>
+  <link rel="stylesheet" href="../../node_modules/@fontsource-variable/outfit/index.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- İkonlar -->
+  <svg width="0" height="0" class="sprite" aria-hidden="true">
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" /></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2.5" width="8" height="4" rx="1" /><path d="M16 4.5h2a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2h2" /><path d="M9 14l2 2 4-4" /></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21.5h4M12 2.5a6.5 6.5 0 0 0-4 11.6c.7.6 1 1.3 1 2.1V16h6v-.8c0-.8.3-1.5 1-2.1a6.5 6.5 0 0 0-4-11.6z" /><path d="M12 6.5a3 3 0 0 0-3 3" /></symbol>
+    <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11" /><rect x="5" y="6.5" width="3" height="11" rx="1" /><rect x="16" y="6.5" width="3" height="11" rx="1" /></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3.5 2" /></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5" /><path d="M8 3v4M16 3v4M3.5 10h17" /></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="8" /><path d="M12 9.5v4l2.5 2M9.5 2.5h5M12 2.5v3M19 6l1.5-1.5" /></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5.2v13.6a.8.8 0 0 0 1.2.7l10.8-6.8a.8.8 0 0 0 0-1.4L8.7 4.5a.8.8 0 0 0-1.2.7z" /></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="3.5" height="14" rx="1" /><rect x="14" y="5" width="3.5" height="14" rx="1" /></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5" /><path d="M3.5 3.5v5h5" /></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5.5 5l10 7-10 7V5zM18.5 5v14" /></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5" /><path d="M3.5 7l8.5 6 8.5-6" /></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M20 12.5a7.5 7.5 0 0 1-11.2 6.5L4 20l1.1-4.3A7.5 7.5 0 1 1 20 12.5z" /></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8" /></symbol>
+  </svg>
+
+  <div class="titlebar">
+    <span class="logo"><svg><use href="#i-check" /></svg></span>
+    <span class="app-name">FocusLine</span>
+  </div>
+
+  <div class="shell">
+    <!-- Kenar menü -->
+    <aside class="sidebar">
+      <p class="side-label">Bölümler</p>
+      <nav class="nav">
+        <button class="nav-item active" data-view="tasks">
+          <span class="nav-icon"><svg><use href="#i-clipboard" /></svg></span>
+          <span class="nav-text"><strong>Görevler</strong><small id="nav-tasks"></small></span>
+          <svg class="chev"><use href="#i-right" /></svg>
+        </button>
+        <button class="nav-item" data-view="focus" id="nav-focus-item">
+          <span class="nav-icon"><svg><use href="#i-timer" /></svg></span>
+          <span class="nav-text"><strong>Odak</strong><small id="nav-focus"></small></span>
+          <svg class="chev"><use href="#i-right" /></svg>
+        </button>
+        <button class="nav-item" data-view="ideas">
+          <span class="nav-icon"><svg><use href="#i-bulb" /></svg></span>
+          <span class="nav-text"><strong>Fikirler</strong><small id="nav-ideas"></small></span>
+          <svg class="chev"><use href="#i-right" /></svg>
+        </button>
+        <button class="nav-item" data-view="sport">
+          <span class="nav-icon"><svg><use href="#i-dumbbell" /></svg></span>
+          <span class="nav-text"><strong>Spor</strong><small id="nav-sport"></small></span>
+          <svg class="chev"><use href="#i-right" /></svg>
+        </button>
+      </nav>
+
+      <div class="side-progress">
+        <p>Bugünün ilerlemesi</p>
+        <div class="bar"><span id="side-bar"></span></div>
+        <small id="side-progress-text"></small>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- GÖREVLER -->
+      <section class="view" id="view-tasks">
+        <div class="layout">
+          <div class="col-main">
+            <header class="hero">
+              <p class="hero-date" id="hero-date"></p>
+              <div class="hero-row">
+                <div>
+                  <h1 id="hero-title">Bugün</h1>
+                  <p class="hero-sub" id="hero-sub"></p>
+                </div>
+                <button class="btn-white" data-focus="task-title">
+                  <svg><use href="#i-plus" /></svg>Yeni Ekle
+                </button>
+              </div>
+            </header>
+
+            <div class="week">
+              <button class="icon-btn" id="week-prev" title="Önceki hafta"><svg><use href="#i-left" /></svg></button>
+              <div class="week-days" id="week-days"></div>
+              <button class="icon-btn" id="week-next" title="Sonraki hafta"><svg><use href="#i-right" /></svg></button>
+            </div>
+
+            <div class="section-head">
+              <h2>Görevlerim</h2>
+              <button class="chip-btn" id="go-today" hidden>Bugüne dön</button>
+            </div>
+            <ul class="task-list" id="task-list"></ul>
+            <p class="empty" id="task-empty" hidden></p>
+
+            <div class="day-sport" id="day-sport" hidden>
+              <h3><svg><use href="#i-dumbbell" /></svg>Bu günün sporu</h3>
+              <ul id="day-sport-list"></ul>
+            </div>
+          </div>
+
+          <aside class="col-side">
+            <div class="card calendar">
+              <div class="cal-head">
+                <button class="icon-btn sm" id="cal-prev" title="Önceki ay"><svg><use href="#i-left" /></svg></button>
+                <span class="cal-month" id="cal-month"></span>
+                <button class="icon-btn sm" id="cal-next" title="Sonraki ay"><svg><use href="#i-right" /></svg></button>
+              </div>
+              <div class="cal-grid" id="cal-grid"></div>
+              <div class="cal-legend">
+                <span><i class="dot dot-task"></i>Görev</span>
+                <span><i class="dot dot-sport"></i>Spor</span>
+              </div>
+            </div>
+
+            <form class="card form" id="task-form" autocomplete="off">
+              <div class="form-head">
+                <h3 id="task-form-title">Görev Oluştur</h3>
+                <span class="form-date"><svg><use href="#i-calendar" /></svg><span id="task-form-date"></span></span>
+              </div>
+              <input id="task-title" type="text" placeholder="Görev adı" maxlength="120" required />
+              <textarea id="task-desc" placeholder="Açıklama (isteğe bağlı)" rows="3" maxlength="500"></textarea>
+              <div class="two-col">
+                <label>Başlangıç<input id="task-start" type="time" /></label>
+                <label>Bitiş<input id="task-end" type="time" /></label>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn-ghost" id="task-cancel" hidden>Vazgeç</button>
+                <button type="submit" class="btn-primary" id="task-submit">Görev Oluştur</button>
+              </div>
+            </form>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ODAK -->
+      <section class="view" id="view-focus" hidden>
+        <div class="layout">
+          <div class="col-main">
+            <header class="hero">
+              <p class="hero-date">Odaklan, mola ver, tekrarla</p>
+              <div class="hero-row">
+                <div class="hero-ident">
+                  <span class="hero-icon"><svg><use href="#i-timer" /></svg></span>
+                  <div>
+                    <h1>Odak</h1>
+                    <p class="hero-sub" id="focus-sub"></p>
+                  </div>
+                </div>
+              </div>
+            </header>
+
+            <div class="card timer-card" id="timer-card">
+              <div class="modes" id="timer-modes">
+                <button data-mode="pomodoro">Pomodoro</button>
+                <button data-mode="short">Kısa mola</button>
+                <button data-mode="long">Uzun mola</button>
+                <button data-mode="free">Serbest</button>
+              </div>
+
+              <div class="ring-wrap">
+                <svg class="ring" viewBox="0 0 220 220" aria-hidden="true">
+                  <circle class="ring-track" cx="110" cy="110" r="100" />
+                  <circle class="ring-progress" id="ring-progress" cx="110" cy="110" r="100" />
+                </svg>
+                <div class="ring-center">
+                  <span class="timer-mode" id="timer-mode-label"></span>
+                  <span class="timer-time" id="timer-time">25:00</span>
+                  <span class="cycle-dots" id="cycle-dots" title="Uzun molaya kalan pomodorolar"></span>
+                </div>
+              </div>
+
+              <input id="timer-label" class="timer-label" type="text" list="timer-label-list" maxlength="80"
+                placeholder="Ne üzerinde çalışıyorsun? (isteğe bağlı)" autocomplete="off" />
+              <datalist id="timer-label-list"></datalist>
+
+              <div class="timer-actions">
+                <button class="round-btn" id="timer-reset" title="Sıfırla" aria-label="Sıfırla"><svg><use href="#i-reset" /></svg></button>
+                <button class="btn-primary timer-toggle" id="timer-toggle">
+                  <svg id="timer-toggle-icon"><use href="#i-play" /></svg><span id="timer-toggle-text">Başlat</span>
+                </button>
+                <button class="round-btn" id="timer-skip" title="Sonraki aşamaya geç" aria-label="Sonraki aşamaya geç"><svg><use href="#i-skip" /></svg></button>
+              </div>
+              <p class="timer-hint" id="timer-hint">Boşluk tuşu: başlat / duraklat</p>
+            </div>
+
+            <div class="stats">
+              <div class="stat"><small>Bu hafta</small><strong id="focus-week">0</strong><span>saat</span></div>
+              <div class="stat"><small>Günlük ortalama</small><strong id="focus-avg">0</strong><span>saat / gün (bu hafta)</span></div>
+              <div class="stat"><small>Toplam</small><strong id="focus-total">0</strong><span>saat</span></div>
+            </div>
+
+            <div class="card week-chart">
+              <div class="chart-head"><h3>Bu hafta günlük çalışma (saat)</h3></div>
+              <div class="bars" id="focus-bars"></div>
+            </div>
+
+            <div class="section-head"><h2>Çalışma Geçmişi</h2></div>
+            <div id="focus-log"></div>
+            <p class="empty" id="focus-empty" hidden>Henüz çalışma kaydı yok. Zamanlayıcıyı başlat, duraklattığında süre buraya eklenecek.</p>
+          </div>
+
+          <aside class="col-side">
+            <div class="card today-card">
+              <small>Bugün çalıştığın süre</small>
+              <strong id="focus-today">0 dk</strong>
+              <div class="bar"><span id="focus-goal-bar"></span></div>
+              <span class="goal-text" id="focus-goal-text"></span>
+              <div class="today-pomos" id="focus-pomos"></div>
+            </div>
+
+            <form class="card form" id="focus-settings" autocomplete="off">
+              <div class="form-head"><h3>Ayarlar</h3></div>
+              <div class="two-col">
+                <label>Pomodoro (dk)<input id="set-work" type="number" min="1" max="180" /></label>
+                <label>Günlük hedef (saat)<input id="set-goal" type="number" min="0.5" max="16" step="0.5" /></label>
+                <label>Kısa mola (dk)<input id="set-short" type="number" min="1" max="60" /></label>
+                <label>Uzun mola (dk)<input id="set-long" type="number" min="1" max="90" /></label>
+              </div>
+              <p class="form-note">Her 4 pomodorodan sonra uzun mola gelir. Molalar çalışma süresine sayılmaz.</p>
+            </form>
+          </aside>
+        </div>
+      </section>
+
+      <!-- FİKİRLER -->
+      <section class="view" id="view-ideas" hidden>
+        <div class="layout">
+          <div class="col-main">
+            <header class="hero">
+              <p class="hero-date">Aklına gelenleri kaybetme</p>
+              <div class="hero-row">
+                <div class="hero-ident">
+                  <span class="hero-icon"><svg><use href="#i-bulb" /></svg></span>
+                  <div>
+                    <h1>Fikirler</h1>
+                    <p class="hero-sub" id="ideas-sub"></p>
+                  </div>
+                </div>
+                <button class="btn-white" data-focus="idea-title">
+                  <svg><use href="#i-plus" /></svg>Yeni Ekle
+                </button>
+              </div>
+            </header>
+
+            <div class="scope-row">
+              <div class="modes" id="idea-scope">
+                <button data-scope="personal" class="active">Kişisel</button>
+                <button data-scope="shared">Ortak<i class="sync-dot" id="sync-dot"></i></button>
+              </div>
+              <label class="search" id="idea-search-box">
+                <svg><use href="#i-search" /></svg>
+                <input id="idea-search" type="search" placeholder="Fikirlerde ara..." />
+              </label>
+            </div>
+
+            <div class="shared-bar" id="shared-bar" hidden>
+              <span class="room-pill"><svg><use href="#i-users" /></svg><strong id="room-name"></strong><span class="owner-badge" id="room-owner-badge" hidden>sahibi sensin</span></span>
+              <span class="sync-status" id="sync-status"></span>
+              <span class="spacer"></span>
+              <button class="chip-btn" id="room-switch">Alanlar</button>
+              <button class="chip-btn muted" id="room-leave">Alandan çık</button>
+            </div>
+
+            <!-- Giriş / kayıt -->
+            <div class="card connect-card" id="auth-card" hidden>
+              <span class="hero-icon soft"><svg><use href="#i-users" /></svg></span>
+              <h3>Ortak alanlar için hesabına gir</h3>
+              <p>Ortak alanlara e-posta davetiyle katılırsın. Görevlerin, odak kayıtların ve kişisel fikirlerin yine sadece bu bilgisayarda kalır.</p>
+              <div class="modes auth-tabs" id="auth-tabs">
+                <button type="button" data-auth="login" class="active">Giriş yap</button>
+                <button type="button" data-auth="register">Hesap oluştur</button>
+              </div>
+              <form class="form connect-form" id="auth-form">
+                <label id="auth-name-row" hidden>Adın<input id="auth-name" type="text" maxlength="40" autocomplete="name" placeholder="ör. Yavuz" /></label>
+                <label>E-posta<input id="auth-email" type="email" maxlength="120" autocomplete="email" required /></label>
+                <label>Şifre<input id="auth-password" type="password" minlength="6" maxlength="128" autocomplete="current-password" required /></label>
+                <p class="auth-error" id="auth-error" hidden></p>
+                <div class="auth-actions">
+                  <button type="submit" class="btn-primary" id="auth-submit">Giriş yap</button>
+                  <button type="button" class="link-btn" id="auth-forgot">Şifremi unuttum</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- E-posta doğrulama -->
+            <div class="card connect-card" id="verify-card" hidden>
+              <span class="hero-icon soft"><svg><use href="#i-mail" /></svg></span>
+              <h3>E-postanı doğrula</h3>
+              <p><strong id="verify-email"></strong> adresine bir doğrulama bağlantısı gönderdik. Bağlantıya tıkladığında burası kendiliğinden devam eder. E-posta gelmediyse gereksiz (spam) klasörüne de bak.</p>
+              <div class="auth-actions">
+                <button class="btn-primary" id="verify-check">Doğruladım</button>
+                <button class="btn-ghost" id="verify-resend">Tekrar gönder</button>
+                <button class="link-btn" id="verify-logout">Farklı hesapla gir</button>
+              </div>
+            </div>
+
+            <!-- Alanlarım + davetler -->
+            <div class="card connect-card lobby" id="lobby-card" hidden>
+              <div class="account-row">
+                <span class="author" id="account-chip"></span>
+                <span class="account-email" id="account-email"></span>
+                <span class="spacer"></span>
+                <button class="chip-btn muted" id="logout-btn">Çıkış yap</button>
+              </div>
+              <div class="lobby-section" id="invite-section" hidden>
+                <h4>Davetler</h4>
+                <ul class="lobby-list" id="invite-list"></ul>
+              </div>
+              <div class="lobby-section">
+                <h4>Alanların</h4>
+                <ul class="lobby-list" id="room-list"></ul>
+                <p class="form-note" id="room-empty" hidden>Henüz bir alanın yok. Yeni bir alan oluşturup arkadaşlarını davet edebilir ya da sana gelen bir daveti kabul edebilirsin.</p>
+              </div>
+              <form class="create-room" id="create-room-form" autocomplete="off">
+                <input id="create-room-name" type="text" maxlength="60" placeholder="Yeni alan adı (ör. Proje fikirleri)" required />
+                <button type="submit" class="btn-primary">Alan oluştur</button>
+              </form>
+            </div>
+
+            <div class="card connect-card" id="unconfigured-card" hidden>
+              <span class="hero-icon soft"><svg><use href="#i-users" /></svg></span>
+              <h3>Ortak alan henüz ayarlanmadı</h3>
+              <p>Bu özelliğin çalışması için uygulamaya Firebase bilgilerinin eklenmesi gerekiyor (<code>src/shared/firebase-config.js</code>).</p>
+            </div>
+
+            <div class="idea-grid" id="idea-grid"></div>
+            <p class="empty" id="idea-empty" hidden></p>
+          </div>
+
+          <aside class="col-side" id="idea-side">
+            <div class="card people-card" id="people-card" hidden>
+              <div class="form-head">
+                <h3>Alandakiler</h3>
+                <span class="people-count" id="people-count"></span>
+              </div>
+              <ul class="people-list" id="people-list"></ul>
+              <p class="form-note" id="people-note" hidden></p>
+              <form class="invite-form" id="invite-form" autocomplete="off">
+                <input id="invite-email" type="email" maxlength="120" placeholder="arkadasin@ornek.com" required />
+                <button type="submit" class="btn-ghost">Davet et</button>
+              </form>
+              <label class="toggle-row"><input type="checkbox" id="share-focus" />Bugünkü odak süremi alandakilerle paylaş</label>
+            </div>
+
+            <div class="card idea-detail" id="idea-detail" hidden>
+              <div class="detail-head">
+                <span class="idea-meta" id="detail-meta"></span>
+                <button class="icon-btn sm" id="detail-close" title="Kapat" aria-label="Kapat"><svg><use href="#i-x" /></svg></button>
+              </div>
+              <h3 id="detail-title"></h3>
+              <p class="detail-desc" id="detail-desc"></p>
+              <div class="detail-actions">
+                <button class="chip-btn" id="detail-edit" hidden>Düzenle</button>
+                <button class="chip-btn muted" id="detail-delete" hidden>Sil</button>
+                <span class="form-note" id="detail-readonly" hidden>Bu fikri sadece yazan kişi düzenleyebilir. Sen not ekleyebilirsin.</span>
+              </div>
+              <h4 class="notes-title">Notlar <span id="notes-count"></span></h4>
+              <ul class="notes-list" id="notes-list"></ul>
+              <form class="note-form" id="note-form" autocomplete="off">
+                <textarea id="note-text" rows="2" maxlength="1000" placeholder="Not ekle..." required></textarea>
+                <button type="submit" class="btn-primary">Ekle</button>
+              </form>
+            </div>
+
+            <form class="card form" id="idea-form" autocomplete="off">
+              <div class="form-head">
+                <h3 id="idea-form-title">Fikir Ekle</h3>
+              </div>
+              <input id="idea-title" type="text" placeholder="Fikrin başlığı" maxlength="120" required />
+              <textarea id="idea-desc" placeholder="Detaylar, notlar, bağlantılar..." rows="7" maxlength="2000"></textarea>
+              <div class="form-actions">
+                <button type="button" class="btn-ghost" id="idea-cancel" hidden>Vazgeç</button>
+                <button type="submit" class="btn-primary" id="idea-submit">Fikir Ekle</button>
+              </div>
+            </form>
+          </aside>
+        </div>
+      </section>
+
+      <!-- SPOR -->
+      <section class="view" id="view-sport" hidden>
+        <div class="layout">
+          <div class="col-main">
+            <header class="hero">
+              <p class="hero-date">Hareket et, kaydet, ilerle</p>
+              <div class="hero-row">
+                <div class="hero-ident">
+                  <span class="hero-icon"><svg><use href="#i-dumbbell" /></svg></span>
+                  <div>
+                    <h1>Spor</h1>
+                    <p class="hero-sub" id="sport-sub"></p>
+                  </div>
+                </div>
+                <button class="btn-white" data-focus="sport-type">
+                  <svg><use href="#i-plus" /></svg>Yeni Ekle
+                </button>
+              </div>
+            </header>
+
+            <div class="stats">
+              <div class="stat"><small>Bu hafta</small><strong id="stat-week-min">0</strong><span>dakika</span></div>
+              <div class="stat"><small>Bu ay</small><strong id="stat-month">0</strong><span>antrenman</span></div>
+              <div class="stat"><small>Toplam</small><strong id="stat-total">0</strong><span>antrenman</span></div>
+            </div>
+
+            <div class="card week-chart">
+              <div class="chart-head"><h3>Bu haftanın dakikaları</h3></div>
+              <div class="bars" id="week-bars"></div>
+            </div>
+
+            <div class="section-head"><h2>Antrenman Geçmişi</h2></div>
+            <div id="sport-log"></div>
+            <p class="empty" id="sport-empty" hidden></p>
+          </div>
+
+          <aside class="col-side">
+            <form class="card form" id="sport-form" autocomplete="off">
+              <div class="form-head">
+                <h3 id="sport-form-title">Antrenman Ekle</h3>
+              </div>
+              <input id="sport-type" type="text" placeholder="Aktivite (ör. Koşu)" maxlength="60" required list="sport-types" />
+              <datalist id="sport-types"></datalist>
+              <div class="quick" id="sport-quick"></div>
+              <div class="two-col">
+                <label>Süre (dk)<input id="sport-duration" type="number" min="1" max="1440" placeholder="45" required /></label>
+                <label>Tarih<input id="sport-date" type="date" required /></label>
+              </div>
+              <textarea id="sport-note" placeholder="Not (ör. 5 km, 3x12 squat...)" rows="3" maxlength="500"></textarea>
+              <div class="form-actions">
+                <button type="button" class="btn-ghost" id="sport-cancel" hidden>Vazgeç</button>
+                <button type="submit" class="btn-primary" id="sport-submit">Antrenman Ekle</button>
+              </div>
+            </form>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Açık / karanlık tema -->
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Karanlık moda geç" title="Karanlık moda geç">
+    <svg class="sun" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.55 1.55M17.15 17.15l1.55 1.55M5.3 18.7l1.55-1.55M17.15 6.85l1.55-1.55" />
+    </svg>
+    <svg class="moon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M19.5 14.6A7.8 7.8 0 0 1 9.4 4.5a7.8 7.8 0 1 0 10.1 10.1z" />
+    </svg>
+  </button>
+
+  <!-- Davet penceresi -->
+  <dialog class="invite-dialog" id="invite-dialog">
+    <div class="dialog-head">
+      <span class="hero-icon soft" id="invite-dialog-icon"><svg><use href="#i-mail" /></svg></span>
+      <div class="dialog-head-text">
+        <h3 id="invite-dialog-title">Davet kaydediliyor…</h3>
+        <p id="invite-dialog-status"></p>
+      </div>
+      <button type="button" class="icon-btn sm" id="invite-dialog-close" aria-label="Kapat" title="Kapat"><svg><use href="#i-x" /></svg></button>
+    </div>
+
+    <div class="dialog-body">
+      <label class="dialog-field">
+        <span>Uygulamanın indirme bağlantısı <small>(isteğe bağlı, bir kez yazman yeterli)</small></span>
+        <input id="download-url" type="url" maxlength="500" placeholder="https://drive.google.com/..." autocomplete="off" />
+      </label>
+      <p class="form-note">Kurulum dosyasını (<code>FocusLine-Kurulum-….exe</code>) Google Drive'a yükle, <strong>"Bağlantıya sahip olan herkes"</strong> ile paylaş ve bağlantıyı buraya yapıştır. Mesaja otomatik eklenir ve sonraki davetlerde hatırlanır.</p>
+
+      <label class="dialog-field">
+        <span>Gönderilecek mesaj</span>
+        <textarea id="invite-message" rows="11" readonly></textarea>
+      </label>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn-primary" id="invite-gmail"><svg><use href="#i-mail" /></svg>Gmail'de aç</button>
+      <button type="button" class="btn-ghost" id="invite-copy">Metni kopyala</button>
+      <button type="button" class="btn-ghost" id="invite-mailapp">E-posta programında aç</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" hidden>
+    <span id="toast-text"></span>
+    <button id="toast-undo">Geri al</button>
+  </div>
+
+  <script src="shared.bundle.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>
