@@ -4,82 +4,85 @@
 
 # FocusLine
 
-**Görevlerini planla, odaklan, öğrendiklerini not al, fikirlerini arkadaşlarınla paylaş.**
+**Plan your day, stay focused, capture what you learn, and share ideas with friends.**
 
-Takvimli görev listesi, pomodoro zamanlayıcısı, proje notları, ortak fikir alanları ve spor takibini tek bir yerde toplayan Windows masaüstü uygulaması.
+A Windows desktop app that brings a calendar-based task list, a Pomodoro timer, project notes, shared idea spaces and workout tracking together in one place.
 
 ![Platform](https://img.shields.io/badge/platform-Windows-6c5ce7)
 ![Electron](https://img.shields.io/badge/Electron-33-47848f?logo=electron&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-ffca28?logo=firebase&logoColor=black)
-![Lisans](https://img.shields.io/badge/lisans-MIT-2ea36c)
+![Language](https://img.shields.io/badge/UI-Turkish-e05561)
+![License](https://img.shields.io/badge/license-MIT-2ea36c)
 
-<img src="docs/screenshots/gorevler.png" alt="FocusLine görevler ekranı" width="860" />
+<img src="docs/screenshots/gorevler.png" alt="FocusLine tasks screen" width="860" />
 
 </div>
 
+> **Note:** The app's user interface is in Turkish.
+
 ---
 
-## Özellikler
+## Features
 
-### 📋 Görevler ve takvim
-- Gün gün görev listesi; haftalık şerit ve hafta numaralı aylık takvim
-- Başlangıç–bitiş saati; o an süren görev vurgulanır
-- Takvimde görev ve spor yapılan günler noktalarla işaretlenir
-- Seçili günün çalışma süresi ve spor kaydı bir bakışta
+### 📋 Tasks & calendar
+- Day-by-day task list with a weekly strip and a monthly calendar (with ISO week numbers)
+- Optional start/end times; the task happening right now is highlighted
+- Days with tasks or workouts are marked with dots on the calendar
+- See the selected day's focus time and workouts at a glance
 
-### ⏱️ Odak (pomodoro)
-- Pomodoro, kısa mola, uzun mola ve sınırsız **serbest çalışma** modları
-- Duraklat → devam et aynı oturumda birikir; oturum "bitir" deyince kaydedilir
-- Günlük hedef, haftalık saat grafiği ve oturum geçmişi
-- Pencere kapansa da sayaç sistem tepsisinde çalışmaya devam eder
+### ⏱️ Focus (Pomodoro)
+- Pomodoro, short break, long break and an open-ended **free session** mode
+- Pause → resume keeps adding to the same session until you finish it
+- Daily goal, weekly hours chart and session history
+- The timer keeps running in the system tray when the window is closed
 
-### 📚 Bilgiler
-- Projeler → başlıklar → not defteri gibi düz metin notlar
-- Yazarken otomatik kayıt, proje içinde arama, kelime/karakter sayacı
-- `Tab` ile girinti, `Ctrl+S` ile anında kayıt
+### 📚 Notes
+- Projects → topics → plain-text notes, like writing in a text file
+- Autosave while typing, search within a project, word/character counter
+- `Tab` for indentation, `Ctrl+S` to save instantly
 
-### 💡 Fikirler
-- **Kişisel** fikirler yalnızca bilgisayarında kalır
-- **Ortak alanlar**: e-posta + şifre ile giriş, e-postayla davet, gerçek zamanlı senkronizasyon
-  - Fikri yalnızca yazan düzenler; herkes not ekleyebilir
-  - Fikri yalnızca yazan ya da alan sahibi silebilir
-  - "Alandakiler" listesinde kimin çevrimiçi olduğu ve bugünkü odak süreleri
+### 💡 Ideas
+- **Personal** ideas stay on your computer only
+- **Shared spaces**: email + password sign-in, email invitations, real-time sync
+  - Only the author can edit an idea; everyone can add notes to it
+  - Only the author or the space owner can delete an idea
+  - The member list shows who is online and everyone's focus time for today
 
-### 🏃 Spor
-- Antrenman kaydı (aktivite, süre, not), haftalık dakika grafiği ve geçmiş
+### 🏃 Workouts
+- Log workouts (activity, duration, note) with a weekly minutes chart and history
 
-### 🌗 Ve dahası
-- Açık / karanlık tema (köşeden yayılan geçiş animasyonuyla)
-- Sistem tepsisi, Windows bildirimleri, tek pencere, geri alınabilir silme
+### 🌗 And more
+- Light / dark theme with a circular reveal transition
+- System tray, Windows notifications, single window, undo for deletions
 
-## Ekran görüntüleri
+## Screenshots
 
-| Odak | Bilgiler |
+| Focus | Notes |
 | :---: | :---: |
-| <img src="docs/screenshots/odak.png" alt="Odak ekranı" /> | <img src="docs/screenshots/bilgiler.png" alt="Bilgiler ekranı" /> |
-| **Ortak fikirler** | **Karanlık tema** |
-| <img src="docs/screenshots/ortak-fikirler.png" alt="Ortak fikirler ekranı" /> | <img src="docs/screenshots/karanlik-tema.png" alt="Karanlık tema" /> |
+| <img src="docs/screenshots/odak.png" alt="Focus screen" /> | <img src="docs/screenshots/bilgiler.png" alt="Notes screen" /> |
+| **Shared ideas** | **Dark theme** |
+| <img src="docs/screenshots/ortak-fikirler.png" alt="Shared ideas screen" /> | <img src="docs/screenshots/karanlik-tema.png" alt="Dark theme" /> |
 
 <details>
-<summary>Spor ekranı</summary>
+<summary>Workouts screen</summary>
 
-<img src="docs/screenshots/spor.png" alt="Spor ekranı" width="760" />
+<img src="docs/screenshots/spor.png" alt="Workouts screen" width="760" />
 
 </details>
 
-## Klavye kısayolları
+## Keyboard shortcuts
 
-| Kısayol | Nerede | Ne yapar |
+| Shortcut | Where | What it does |
 | --- | --- | --- |
-| `Ctrl+N` | Her sekme | Yeni kayıt (görev, fikir, antrenman, başlık) |
-| `Boşluk` | Odak | Zamanlayıcıyı başlat / duraklat |
-| `Ctrl+S` | Bilgiler | Notu hemen kaydet |
-| `Tab` | Bilgiler | Girinti ekle |
-| `Esc` | Formlar | Düzenlemeyi iptal et |
+| `Ctrl+N` | Every tab | New item (task, idea, workout, topic) |
+| `Space` | Focus | Start / pause the timer |
+| `Ctrl+S` | Notes | Save the note immediately |
+| `Tab` | Notes | Insert indentation |
+| `Esc` | Forms | Cancel editing |
 
-## Geliştirme
+## Development
 
-Gerekenler: [Node.js](https://nodejs.org) 20 veya üzeri, Windows.
+Requirements: [Node.js](https://nodejs.org) 20 or later, Windows.
 
 ```bash
 git clone https://github.com/Yavuzgmus/focusline.git
@@ -88,64 +91,64 @@ npm install
 npm start
 ```
 
-### Kurulum dosyası üretme
+### Building the installer
 
 ```bash
 npm run dist
 ```
 
-`dist/` klasörüne iki dosya üretilir:
+Two files are created in `dist/`:
 
-| Dosya | Açıklama |
+| File | Description |
 | --- | --- |
-| `FocusLine-Kurulum-<sürüm>.exe` | Normal kurulum (önerilen) |
-| `FocusLine-Tasinabilir-<sürüm>.exe` | Kurulum gerektirmeden çalışır |
+| `FocusLine-Kurulum-<version>.exe` | Standard installer (recommended) |
+| `FocusLine-Tasinabilir-<version>.exe` | Portable, runs without installation |
 
-Yeni sürümden önce `package.json` içindeki `version` artırılır. `build.appId` değiştirilmemelidir: Windows, yeni kurulumun eskisinin yerini alacağını bu kimlikten anlar.
+Bump `version` in `package.json` before each release. Do not change `build.appId`: Windows uses it to recognize that a new installer replaces the previous installation.
 
-## Proje yapısı
+## Project structure
 
 ```
 src/
-├── main.js                Ana süreç: pencere, sistem tepsisi, dosyaya kayıt, tema
-├── preload.js             Ana süreç ile arayüz arasındaki güvenli köprü
+├── main.js                Main process: window, system tray, file storage, theme
+├── preload.js             Secure bridge between the main process and the UI
 ├── renderer/
-│   ├── index.html         Arayüz iskeleti
-│   ├── styles.css         Tasarım (açık ve karanlık tema)
-│   └── renderer.js        Uygulama mantığı
+│   ├── index.html         UI markup
+│   ├── styles.css         Styles (light and dark theme)
+│   └── renderer.js        Application logic
 └── shared/
-    ├── shared.js          Ortak alanlar: Firebase giriş + Firestore senkronizasyonu
-    └── firebase-config.js Firebase proje ayarları
-assets/                    Uygulama ikonu
-docs/screenshots/          README görselleri
-firestore.rules            Firestore güvenlik kuralları
+    ├── shared.js          Shared spaces: Firebase sign-in + Firestore sync
+    └── firebase-config.js Firebase project settings
+assets/                    App icon
+docs/screenshots/          README images
+firestore.rules            Firestore security rules
 ```
 
-`src/shared/shared.js`, [esbuild](https://esbuild.github.io) ile `src/renderer/shared.bundle.js` dosyasına paketlenir. Bu dosya `npm start` / `npm run dist` sırasında otomatik üretilir ve depoda tutulmaz.
+`src/shared/shared.js` is bundled with [esbuild](https://esbuild.github.io) into `src/renderer/shared.bundle.js`. That file is generated automatically by `npm start` / `npm run dist` and is not committed.
 
-## Kullanılan teknolojiler
+## Tech stack
 
-- [Electron](https://www.electronjs.org): masaüstü uygulama çatısı
-- Saf HTML, CSS ve JavaScript (arayüz çerçevesi yok)
-- [Firebase Authentication](https://firebase.google.com/docs/auth) ve [Cloud Firestore](https://firebase.google.com/docs/firestore): ortak alanlar
-- [electron-builder](https://www.electron.build): Windows kurulum dosyası
-- [Outfit](https://fonts.google.com/specimen/Outfit) yazı tipi (yerel olarak paketlenir)
+- [Electron](https://www.electronjs.org): desktop application framework
+- Plain HTML, CSS and JavaScript (no UI framework)
+- [Firebase Authentication](https://firebase.google.com/docs/auth) and [Cloud Firestore](https://firebase.google.com/docs/firestore): shared spaces
+- [electron-builder](https://www.electron.build): Windows installer
+- [Outfit](https://fonts.google.com/specimen/Outfit) typeface (bundled locally)
 
-## Veriler ve gizlilik
+## Data & privacy
 
-- **Bilgisayarında kalanlar:** görevler, odak kayıtları, spor kayıtları, kişisel fikirler ve Bilgiler notları. Konum: `%APPDATA%\todo-uygulama\data.json`
-- **Firebase'e gidenler:** yalnızca ortak alanlar (ortak fikirler, notlar, üye listesi, davetler) ve paylaşmayı seçersen bugünkü odak süren.
-- Erişim kuralları sunucu tarafında [`firestore.rules`](firestore.rules) ile uygulanır: bir alana yalnızca davet edilen ve e-postasını doğrulamış kullanıcılar girebilir.
+- **Stored on your computer:** tasks, focus sessions, workouts, personal ideas and notes. Location: `%APPDATA%\todo-uygulama\data.json`
+- **Stored in Firebase:** only shared spaces (shared ideas, notes on them, member list, invitations) and, if you choose to share it, your focus time for today.
+- Access rules are enforced server-side by [`firestore.rules`](firestore.rules): only invited users with a verified email address can join a space.
 
-## Kendi Firebase projenle çalıştırma
+## Running with your own Firebase project
 
-1. [Firebase konsolunda](https://console.firebase.google.com) yeni bir proje oluştur.
-2. **Authentication → Sign-in method** bölümünde *Email/Password* sağlayıcısını aç.
-3. **Firestore Database** oluştur; **Rules** sekmesine `firestore.rules` içeriğini yapıştırıp yayınla.
-4. **Project settings → Your apps → Web** ile bir web uygulaması ekle ve verilen ayarları `src/shared/firebase-config.js` dosyasına yaz.
+1. Create a new project in the [Firebase console](https://console.firebase.google.com).
+2. Under **Authentication → Sign-in method**, enable the *Email/Password* provider.
+3. Create a **Firestore Database**, paste the contents of `firestore.rules` into the **Rules** tab and publish.
+4. Under **Project settings → Your apps → Web**, add a web app and copy its configuration into `src/shared/firebase-config.js`.
 
-> Firebase web ayarları gizli bilgi değildir; erişimi güvenlik kuralları belirler.
+> Firebase web configuration values are not secrets; access is controlled by the security rules.
 
-## Lisans
+## License
 
 [MIT](LICENSE) © Yavuz Gümüş

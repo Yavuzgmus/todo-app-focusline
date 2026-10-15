@@ -2,7 +2,7 @@
   "name": "focusline",
   "version": "1.7.0",
   "private": true,
-  "description": "FocusLine - görevler, odak, fikirler ve spor takibi",
+  "description": "Windows desktop app for calendar-based tasks, Pomodoro focus tracking, project notes, shared ideas and workout logging.",
   "main": "src/main.js",
   "scripts": {
     "build:shared": "esbuild src/shared/shared.js --bundle --format=iife --target=chrome120 --minify --outfile=src/renderer/shared.bundle.js",
