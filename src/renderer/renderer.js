@@ -104,6 +104,9 @@ function loadData() {
     focus: arr(src.focus),
     timer: { ...DEFAULT_TIMER, ...obj(src.timer) },
     focusSettings: { ...DEFAULT_FOCUS_SETTINGS, ...obj(src.focusSettings) },
+    // Bilgiler: projeler ve altındaki başlıklar (düz metin notlar)
+    projects: arr(src.projects),
+    pages: arr(src.pages),
     // room: eski "alan kodu" (giriş yapılınca hesaba taşınır), roomId: son açık ortak alan
     shared: { name: '', room: '', roomId: '', shareFocus: true, ...obj(src.shared) },
   };
@@ -189,6 +192,7 @@ const formResetters = {
   ideas: () => state.editIdea && setIdeaForm(null),
   sports: () => state.editSport && setSportForm(null),
   focus: () => {},
+  pages: () => {},
 };
 
 function removeWithUndo(listName, id, label) {
@@ -209,7 +213,7 @@ function removeWithUndo(listName, id, label) {
 function setView(view) {
   state.view = view;
   document.querySelectorAll('.nav-item').forEach((b) => b.classList.toggle('active', b.dataset.view === view));
-  for (const v of ['tasks', 'focus', 'ideas', 'sport']) $(`view-${v}`).hidden = v !== view;
+  for (const v of ['tasks', 'focus', 'ideas', 'sport', 'info']) $(`view-${v}`).hidden = v !== view;
   document.querySelector('.content').scrollTop = 0;
 }
 
@@ -231,6 +235,7 @@ function render() {
   renderIdeas();
   renderSport();
   renderFocus();
+  renderInfo();
   state.justAdded = null;
 }
 
@@ -247,6 +252,7 @@ function renderNav() {
     ? `${data.ideas.length} fikir · ${shared.ideas.length} ortak`
     : `${data.ideas.length} fikir`;
   $('nav-sport').textContent = `Bu hafta ${weekSports} antrenman`;
+  $('nav-info').textContent = `${data.projects.length} proje · ${data.pages.length} başlık`;
 
   $('side-bar').style.width = todays.length ? `${(done / todays.length) * 100}%` : '0';
   $('side-progress-text').textContent = todays.length
@@ -1577,6 +1583,298 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
+/* ---------- Bilgiler (proje → başlık → düz metin not) ---------- */
+// Her şey sadece bu bilgisayarda: data.projects ve data.pages. Yazarken kendiliğinden kaydedilir.
+
+const kb = {
+  projectId: (data.kbLast && data.kbLast.projectId) || null,
+  pageId: (data.kbLast && data.kbLast.pageId) || null,
+  loadedPageId: null, // yazı alanına en son yüklenen başlık (yazarken alanı yeniden doldurmamak için)
+  query: '',
+  renaming: null,
+  saveTimer: null,
+  savedAt: 0,
+};
+
+const kbProject = () => data.projects.find((p) => p.id === kb.projectId) || null;
+const kbPage = () => data.pages.find((p) => p.id === kb.pageId) || null;
+const kbPagesOf = (projectId) => data.pages.filter((p) => p.projectId === projectId).sort((a, b) => a.createdAt - b.createdAt);
+
+function kbEnsureSelection() {
+  if (!kbProject()) {
+    const first = [...data.projects].sort((a, b) => a.createdAt - b.createdAt)[0];
+    kb.projectId = first ? first.id : null;
+  }
+  const pages = kbPagesOf(kb.projectId);
+  if (!pages.some((p) => p.id === kb.pageId)) kb.pageId = pages[0] ? pages[0].id : null;
+}
+
+function kbRemember() {
+  data.kbLast = { projectId: kb.projectId, pageId: kb.pageId };
+  writeData(data);
+}
+
+function kbPreview(body) {
+  const line = (body || '').split('\n').map((l) => l.trim()).find(Boolean);
+  return line ? line.slice(0, 80) : 'Boş';
+}
+
+function kbProjectItem(project, count) {
+  if (kb.renaming === project.id) {
+    const input = h('input', { class: 'kb-rename', value: project.name, maxlength: 60 });
+    let done = false;
+    const finish = (save) => {
+      if (done) return;
+      done = true;
+      const name = input.value.trim();
+      if (save && name) project.name = name;
+      kb.renaming = null;
+      commit();
+    };
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') finish(true);
+      if (e.key === 'Escape') finish(false);
+    });
+    input.addEventListener('blur', () => finish(true));
+    setTimeout(() => { input.focus(); input.select(); });
+    return h('li', { class: 'kb-item active' }, icon('i-folder'), input);
+  }
+  return h('li', {
+    class: project.id === kb.projectId ? 'kb-item active' : 'kb-item',
+    title: 'Yeniden adlandırmak için çift tıkla',
+    onclick: () => kbSelectProject(project.id),
+    ondblclick: () => kbStartRename(project.id),
+  },
+  icon('i-folder'),
+  h('span', { class: 'kb-item-text' }, h('strong', { text: project.name })),
+  h('span', { class: 'kb-count', text: count }),
+  h('span', { class: 'kb-actions' },
+    h('button', { class: 'icon-btn sm', title: 'Yeniden adlandır', 'aria-label': 'Projeyi yeniden adlandır', onclick: (e) => { e.stopPropagation(); kbStartRename(project.id); } }, icon('i-pencil')),
+    h('button', { class: 'icon-btn sm', title: 'Projeyi sil', 'aria-label': 'Projeyi sil', onclick: (e) => { e.stopPropagation(); kbDeleteProject(project.id); } }, icon('i-trash'))));
+}
+
+function kbPageItem(page) {
+  return h('li', {
+    class: page.id === kb.pageId ? 'kb-item active' : 'kb-item',
+    title: `Son düzenleme: ${new Date(page.updatedAt).toLocaleString('tr-TR')}`,
+    onclick: () => kbSelectPage(page.id),
+  },
+  icon('i-page'),
+  h('span', { class: 'kb-item-text' },
+    h('strong', { text: page.title || 'Başlıksız' }),
+    h('span', { text: `${agoText(page.updatedAt)} · ${kbPreview(page.body)}` })));
+}
+
+function kbCountsText(body) {
+  const words = body.trim() ? body.trim().split(/\s+/).length : 0;
+  return `${words} kelime · ${body.length} karakter`;
+}
+
+function kbUpdateStatus() {
+  const page = kbPage();
+  if (!page) return;
+  $('kb-save-status').textContent = kb.saveTimer
+    ? 'Kaydediliyor…'
+    : kb.savedAt ? `Kaydedildi · ${fmtTime(kb.savedAt)}` : `Son düzenleme: ${agoText(page.updatedAt)}`;
+  $('kb-counts').textContent = kbCountsText(page.body);
+}
+
+function renderInfo() {
+  kbEnsureSelection();
+  const project = kbProject();
+  const page = kbPage();
+  $('info-sub').textContent = `${data.projects.length} proje · ${data.pages.length} başlık`;
+
+  // Yeniden adlandırma kutusu açıkken listeyi yeniden çizme (yazılan ad kaybolmasın).
+  if (!(kb.renaming && document.querySelector('#kb-projects .kb-rename'))) {
+    const counts = countBy(data.pages, 'projectId');
+    $('kb-projects').replaceChildren(...[...data.projects]
+      .sort((a, b) => a.createdAt - b.createdAt)
+      .map((p) => kbProjectItem(p, counts.get(p.id) || 0)));
+  }
+
+  $('kb-pages-title').textContent = project ? project.name : 'Başlıklar';
+  $('kb-new-page').disabled = !project;
+  $('info-new-page-hero').disabled = !project;
+  $('kb-search').disabled = !project;
+
+  const all = project ? kbPagesOf(project.id) : [];
+  const q = lower(kb.query.trim());
+  const pages = all.filter((p) => !q || lower(p.title).includes(q) || lower(p.body).includes(q));
+  $('kb-pages').replaceChildren(...pages.map(kbPageItem));
+  $('kb-pages-empty').hidden = pages.length > 0;
+  $('kb-pages-empty').textContent = !project
+    ? 'Önce soldan bir proje oluştur.'
+    : all.length ? 'Aramana uyan başlık yok.' : 'Bu projede henüz başlık yok. Yukarıdaki + ile ekle.';
+
+  $('kb-editor-body').hidden = !page;
+  $('kb-editor-empty').hidden = !!page;
+  $('kb-editor-empty-text').textContent = !data.projects.length
+    ? 'Soldan ilk projeni oluştur, sonra altına başlıklar ekleyip öğrendiklerini yaz.'
+    : 'Bir başlık seç ya da yeni bir başlık oluştur.';
+
+  if (page && kb.loadedPageId !== page.id) {
+    $('kb-page-title').value = page.title;
+    $('kb-text').value = page.body;
+    $('kb-text').scrollTop = 0;
+    kb.loadedPageId = page.id;
+    kb.savedAt = 0;
+  }
+  if (!page) kb.loadedPageId = null;
+  kbUpdateStatus();
+}
+
+// Yazarken her tuşta değil, yazmaya ara verince kaydet.
+function kbSaveSoon() {
+  clearTimeout(kb.saveTimer);
+  kb.saveTimer = setTimeout(kbSaveNow, 500);
+  kbUpdateStatus();
+}
+
+function kbSaveNow() {
+  clearTimeout(kb.saveTimer);
+  kb.saveTimer = null;
+  if (!writeData(data)) {
+    showToast('Not kaydedilemedi!');
+    return;
+  }
+  kb.savedAt = Date.now();
+  renderInfo();
+  renderNav();
+}
+
+function kbFlush() {
+  if (kb.saveTimer) kbSaveNow();
+}
+
+function kbSelectProject(id) {
+  kbFlush();
+  kb.projectId = id;
+  kb.pageId = null;
+  kb.query = '';
+  $('kb-search').value = '';
+  kbEnsureSelection();
+  kbRemember();
+  renderInfo();
+}
+
+function kbSelectPage(id) {
+  kbFlush();
+  kb.pageId = id;
+  kbRemember();
+  renderInfo();
+  $('kb-text').focus();
+}
+
+function kbNewPage() {
+  const project = kbProject();
+  if (!project) {
+    $('kb-project-name').focus();
+    return;
+  }
+  kbFlush();
+  const now = Date.now();
+  const page = { id: uid(), projectId: project.id, title: 'Yeni başlık', body: '', createdAt: now, updatedAt: now };
+  data.pages.push(page);
+  kb.pageId = page.id;
+  kb.query = '';
+  $('kb-search').value = '';
+  data.kbLast = { projectId: kb.projectId, pageId: kb.pageId };
+  commit();
+  $('kb-page-title').focus();
+  $('kb-page-title').select();
+}
+
+function kbStartRename(id) {
+  kb.renaming = id;
+  renderInfo();
+}
+
+function kbDeleteProject(id) {
+  const project = data.projects.find((p) => p.id === id);
+  if (!project) return;
+  const pages = data.pages.filter((p) => p.projectId === id);
+  const question = pages.length
+    ? `"${project.name}" projesi ve içindeki ${pages.length} başlık silinsin mi?`
+    : `"${project.name}" projesi silinsin mi?`;
+  if (!confirm(question)) return;
+  kbFlush();
+  data.projects = data.projects.filter((p) => p.id !== id);
+  data.pages = data.pages.filter((p) => p.projectId !== id);
+  commit();
+  showToast('Proje silindi', () => {
+    data.projects.push(project);
+    data.pages.push(...pages);
+    kb.projectId = project.id;
+    commit();
+  });
+}
+
+$('kb-project-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = $('kb-project-name').value.trim();
+  if (!name) return;
+  kbFlush();
+  const project = { id: uid(), name, createdAt: Date.now() };
+  data.projects.push(project);
+  kb.projectId = project.id;
+  kb.pageId = null;
+  $('kb-project-name').value = '';
+  data.kbLast = { projectId: kb.projectId, pageId: null };
+  commit();
+});
+
+$('kb-new-page').addEventListener('click', kbNewPage);
+$('info-new-page-hero').addEventListener('click', kbNewPage);
+
+$('kb-delete-page').addEventListener('click', () => {
+  const page = kbPage();
+  if (!page) return;
+  clearTimeout(kb.saveTimer);
+  kb.saveTimer = null;
+  removeWithUndo('pages', page.id, `"${page.title || 'Başlıksız'}" silindi`);
+});
+
+$('kb-search').addEventListener('input', (e) => {
+  kb.query = e.target.value;
+  renderInfo();
+});
+
+$('kb-page-title').addEventListener('input', (e) => {
+  const page = kbPage();
+  if (!page) return;
+  page.title = e.target.value;
+  page.updatedAt = Date.now();
+  kbSaveSoon();
+});
+
+$('kb-page-title').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    $('kb-text').focus();
+  }
+});
+
+$('kb-text').addEventListener('input', (e) => {
+  const page = kbPage();
+  if (!page) return;
+  page.body = e.target.value;
+  page.updatedAt = Date.now();
+  $('kb-counts').textContent = kbCountsText(page.body);
+  kbSaveSoon();
+});
+
+// Tab tuşu, not defterindeki gibi girinti eklesin (Ctrl+Z ile geri alınabilir).
+$('kb-text').addEventListener('keydown', (e) => {
+  if (e.key === 'Tab' && !e.ctrlKey && !e.altKey) {
+    e.preventDefault();
+    document.execCommand('insertText', false, '\t');
+  }
+});
+
+// Uygulama kapanırken bekleyen notu kaydet.
+window.addEventListener('beforeunload', kbFlush);
+
 /* ---------- Tema (açık / karanlık) ---------- */
 // Kullanıcı seçim yapana kadar Windows'un tema ayarı izlenir; seçim data.theme'e kaydedilir.
 
@@ -1635,6 +1933,15 @@ document.addEventListener('keydown', (e) => {
     if (state.view === 'ideas' && state.editIdea) setIdeaForm(null);
     else if (state.view === 'ideas' && state.selectedIdea) { state.selectedIdea = null; renderIdeas(); }
     if (state.view === 'sport' && state.editSport) setSportForm(null);
+  }
+  if (e.ctrlKey && e.key.toLowerCase() === 's' && state.view === 'info') {
+    e.preventDefault();
+    kbSaveNow();
+  }
+  if (e.ctrlKey && e.key.toLowerCase() === 'n' && state.view === 'info') {
+    e.preventDefault();
+    kbNewPage();
+    return;
   }
   if (e.ctrlKey && e.key.toLowerCase() === 'n') {
     e.preventDefault();

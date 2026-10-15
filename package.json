@@ -1,6 +1,6 @@
 {
   "name": "focusline",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
   "description": "FocusLine - görevler, odak, fikirler ve spor takibi",
   "main": "src/main.js",
@@ -11,6 +11,14 @@
   },
   "author": "Yavuz Gümüş",
   "license": "MIT",
+  "homepage": "https://github.com/Yavuzgmus/focusline#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yavuzgmus/focusline.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Yavuzgmus/focusline/issues"
+  },
   "devDependencies": {
     "electron": "^33.2.0",
     "electron-builder": "^26.15.3",
